@@ -1,12 +1,18 @@
 import "./App.css";
 import { Fragment, useEffect, useState } from "react";
-import { WeatherChart, Input, CityInfo } from "./components";
+import { WeatherChart, Input, CityInfo, Loader } from "./components";
 import { useDebounce } from "./hooks/useThrottle";
 import { getTemperatureData } from "./store/weather";
 import { connect } from "react-redux";
-import { array, func, number, shape, string } from "prop-types";
+import { array, bool, func, number, shape, string } from "prop-types";
 
-const App = ({ currentCity, temperatureData, getTemperatureData }) => {
+const App = ({
+  currentCity,
+  temperatureData,
+  getTemperatureData,
+  loading,
+  error,
+}) => {
   const [city, setCity] = useState("");
   const enteredCity = useDebounce(city, 1000);
 
@@ -18,23 +24,33 @@ const App = ({ currentCity, temperatureData, getTemperatureData }) => {
 
   return (
     <div className="App">
-      <header className="App__Header">
-        <Input placeholder="Please enter the city name" setValue={setCity} />
-      </header>
-      <main>
-        {currentCity && temperatureData ? (
-          <Fragment>
-            <h1>Weather forecast for 5 days: </h1>
-            <CityInfo cityInfo={currentCity} />
-            <WeatherChart
-              class="App__Info--Temp"
-              temperatureData={temperatureData}
+      {loading ? (
+        <Loader open={loading} />
+      ) : (
+        <Fragment>
+          <header className="App__Header">
+            <Input
+              placeholder="Please enter the city name"
+              setValue={setCity}
             />
-          </Fragment>
-        ) : (
-          <h3>No city found, please enter the desired city</h3>
-        )}
-      </main>
+          </header>
+          <main>
+            {error && <span className="App__Error">{error.message}</span>}
+            {currentCity && temperatureData ? (
+              <Fragment>
+                <h1>Weather forecast for 5 days: </h1>
+                <CityInfo cityInfo={currentCity} />
+                <WeatherChart
+                  className="App__Info--Temp"
+                  temperatureData={temperatureData}
+                />
+              </Fragment>
+            ) : (
+              <h3>No city found, please enter the desired city</h3>
+            )}
+          </main>
+        </Fragment>
+      )}
     </div>
   );
 };
@@ -48,11 +64,15 @@ App.propTypes = {
     country: string,
   }),
   temperatureData: array,
+  loading: bool,
+  error: string,
 };
 
-const mapStateToProps = (state) => ({
-  currentCity: state.weather.currentCity,
-  temperatureData: state.weather.temperatureData,
+const mapStateToProps = ({ weather }) => ({
+  currentCity: weather.currentCity,
+  temperatureData: weather.temperatureData,
+  loading: weather.loading,
+  error: weather.error,
 });
 
 export default connect(mapStateToProps, { getTemperatureData })(App);

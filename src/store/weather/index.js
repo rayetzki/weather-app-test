@@ -9,20 +9,32 @@ const initialState = {
   temperatureData: undefined,
 };
 
-const getTemperatureData = createAsyncThunk("weather/fetch", async (city) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}?q=${city}&appId=${WEATHER_APP_KEY}`
-    );
-    return response.data;
-  } catch (error) {
-    return error.message;
+const getTemperatureData = createAsyncThunk(
+  "weather/fetch",
+  (city, { rejectWithValue, dispatch }) => {
+    dispatch(weatherSlice.actions.setLoading(true));
+
+    return new Promise((resolve, _) => {
+      axios
+        .get(`${API_URL}?q=${city}&appId=${WEATHER_APP_KEY}`)
+        .then((response) => response.status === 200 && resolve(response.data))
+        .catch((error) => rejectWithValue(error))
+        .finally(() => dispatch(weatherSlice.actions.setLoading(false)));
+    });
   }
-});
+);
 
 const weatherSlice = createSlice({
   name: "weather",
   initialState,
+  reducers: {
+    setLoading(state, status) {
+      state.loading = status;
+    },
+    setError(state, error) {
+      state.error = error;
+    },
+  },
   extraReducers: {
     [getTemperatureData.fulfilled]: (state, action) => {
       const { city, list } = action.payload;
