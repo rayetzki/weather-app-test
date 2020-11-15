@@ -1,41 +1,20 @@
 import "./App.css";
 import { Fragment, useEffect, useState } from "react";
-import axios, { API_URL, WEATHER_APP_KEY } from "./config";
-import { kalvinToCels } from "./utils/kalvinToCels";
-import { useDebounce } from "./hooks/useThrottle";
 import { WeatherChart, Input, CityInfo } from "./components";
+import { useDebounce } from "./hooks/useThrottle";
+import { getTemperatureData } from "./store/weather";
+import { connect } from "react-redux";
+import { array, func, number, shape, string } from "prop-types";
 
-function App() {
+const App = ({ currentCity, temperatureData, getTemperatureData }) => {
   const [city, setCity] = useState("");
-  const [cityInfo, setCityInfo] = useState(undefined);
-  const [temperatureData, setTemperatureData] = useState(undefined);
   const enteredCity = useDebounce(city, 1000);
 
   useEffect(() => {
     if (enteredCity) {
-      axios
-        .get(`${API_URL}?q=${enteredCity}&appId=${WEATHER_APP_KEY}`)
-        .then((response) => {
-          if (response.status === 200) {
-            setCityInfo(response.data.city);
-            setTemperatureData(
-              response.data.list.map((weatherData) => ({
-                time: new Intl.DateTimeFormat("en-US", {
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                }).format(new Date(weatherData.dt_txt).getTime()),
-                temperature: kalvinToCels(weatherData.main.temp),
-                maxTemperature: kalvinToCels(weatherData.main.temp_max),
-                minTemperature: kalvinToCels(weatherData.main.temp_min),
-                weather: weatherData.weather,
-                description: weatherData.weather[0].description,
-              }))
-            );
-          }
-        });
+      getTemperatureData(enteredCity);
     }
-  }, [enteredCity]);
+  }, [enteredCity, getTemperatureData]);
 
   return (
     <div className="App">
@@ -43,10 +22,10 @@ function App() {
         <Input placeholder="Please enter the city name" setValue={setCity} />
       </header>
       <main>
-        {cityInfo && temperatureData ? (
+        {currentCity && temperatureData ? (
           <Fragment>
             <h1>Weather forecast for 5 days: </h1>
-            <CityInfo cityInfo={cityInfo} />
+            <CityInfo cityInfo={currentCity} />
             <WeatherChart
               class="App__Info--Temp"
               temperatureData={temperatureData}
@@ -58,6 +37,22 @@ function App() {
       </main>
     </div>
   );
-}
+};
 
-export default App;
+App.propTypes = {
+  getTemperatureData: func,
+  currentCity: shape({
+    name: string,
+    sunrise: number,
+    sunset: number,
+    country: string,
+  }),
+  temperatureData: array,
+};
+
+const mapStateToProps = (state) => ({
+  currentCity: state.weather.currentCity,
+  temperatureData: state.weather.temperatureData,
+});
+
+export default connect(mapStateToProps, { getTemperatureData })(App);

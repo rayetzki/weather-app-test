@@ -15,7 +15,7 @@ export const CityInfo = ({
         <div className="App__Data--Datetime">
             <Sun width={"48px"} height={"48px"} />
             <em>Sunrise at: </em>
-            <p>{new Date(cityInfo.sunset).toLocaleTimeString()}</p>
+            <p>{new Date(cityInfo.sunrise).toLocaleTimeString()}</p>
         </div>
         <hr className="App__Data--Separator" />
         <div className="App__Data--Datetime">
