@@ -1,3 +1,18 @@
 .App {
   text-align: center;
+  position: relative;
+}
+
+.App__Header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 16px;
+}
+
+.App__Main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
