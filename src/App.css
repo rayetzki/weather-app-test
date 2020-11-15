@@ -10,6 +10,42 @@
   margin: 0 16px;
 }
 
+.App__Data {
+  display: flex;
+  flex-direction: column;
+  margin: 0 64px 16px;
+  border-radius: 13px;
+  padding: 16px;
+  border: 1px solid cornflowerblue;
+}
+
+.App__Data--Separator {
+  height: 100px;
+  width: 1px;
+  background-color: black;
+}
+
+.App__Data--Basic {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.App__Data--Advanced {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.App__Data--Datetime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+}
+
 .App__Main {
   position: absolute;
   top: 50%;
